@@ -1,84 +1,82 @@
 const Product = require("../model/Product");
 const Vendor = require("../model/Vendor");
 
-exports.createProduct = async(req,res)=>{
-    try{
-        const {title,description,price,stock,category,imageUrl} = req.body;
+// CREATE PRODUCT
+exports.createProduct = async (req, res) => {
+  try {
+    const { title, description, price, stock, category } = req.body;
+    const imageUrl = req.file ? req.file.path : req.body.imageUrl || null;
 
-        const vendor = await Vendor.findOne({user:req.user.id});
-        if(!vendor) return res.status(403).json({message:"Not a vendor"});
+    const vendor = await Vendor.findOne({ user: req.user.id });
+    if (!vendor) return res.status(403).json({ message: "Not a vendor" });
 
-        const product = await Product.create({
-                vendor:vendor._id,
-                title,
-                description,
-                price,
-                stock,
-                category,
-                imageUrl
-        });
+    const product = await Product.create({
+      vendor: vendor._id,
+      title,
+      description,
+      price,
+      stock,
+      category,
+      imageUrl,
+    });
 
-        res.status(201).json(product);
-
-    }catch(error){
-        res.status(500).json("product can't be created : ",error.message)
-    }
+    res.status(201).json(product);
+  } catch (error) {
+    res.status(500).json({ message: "Product creation failed", error: error.message });
+  }
 };
 
-exports.getProducts = async(req,res) =>{
-    try{
-    const products = await Product.find().populate("vendor","shopName");
+// GET ALL PRODUCTS
+exports.getProducts = async (req, res) => {
+  try {
+    const products = await Product.find().populate("vendor", "shopName");
     res.json(products);
-    }catch(error){
-        res.status(500).json("product does not in store",error.message)
-    }
-}
-
-exports.getProductById = async(req,res) =>{
-    try{
-        const productID =await Product.findOne(req.params.id).populate("vendor","shopName");
-        if(!productID) return res.status(404).json({message:"Products does not found"})
-        res.json(productID);
-
-
-    }catch(error){
-
-        res.status(500).json({message:error.message});
-
-    }
-
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-exports.updateProduct = async(req,res) =>{
-    try{
-        const vendor = await Vendor.findOne({user:req.user.id});
-        const product = await Product.findById(req.params.id)
-        if(!product) return res.status(404).json({message:"Product Not Found"});
-        if(product.vendor.toString() !== vendor._id.toString()) return res.status(403).json({message:" Unauthorized"});
-
-        Object.assign(product,req.body);
-        await product.save();
-        res.json(product);
-
-
-    }catch (error){
-             res.status(500).json({message:error.message});
-
-    }
+// GET PRODUCT BY ID
+exports.getProductById = async (req, res) => {
+  try {
+    const productID = await Product.findById(req.params.id).populate("vendor", "shopName");
+    if (!productID) return res.status(404).json({ message: "Product not found" });
+    res.json(productID);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-exports.deleteProduct = async(req,res)=>{
-    try{
+// UPDATE PRODUCT
+exports.updateProduct = async (req, res) => {
+  try {
     const vendor = await Vendor.findOne({ user: req.user.id });
     const product = await Product.findById(req.params.id);
-     if(!product) return res.status(404).json({message:"Product Not Found"});
-    if(product.vendor.toString() !== vendor._id.toString()) return res.status(403).json({message:" Unauthorized"});
 
-    await product.deleteOne()
-    res.json("Product is deleted")
+    if (!product) return res.status(404).json({ message: "Product Not Found" });
+    if (product.vendor.toString() !== vendor._id.toString())
+      return res.status(403).json({ message: "Unauthorized" });
 
-    }catch(error){
-     res.status(500).json({message:error.message});
-   
-    };
-}
+    Object.assign(product, req.body);
+    await product.save();
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// DELETE PRODUCT
+exports.deleteProduct = async (req, res) => {
+  try {
+    const vendor = await Vendor.findOne({ user: req.user.id });
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: "Product Not Found" });
+    if (product.vendor.toString() !== vendor._id.toString())
+      return res.status(403).json({ message: "Unauthorized" });
+
+    await product.deleteOne();
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
