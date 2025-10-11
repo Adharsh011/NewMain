@@ -19,3 +19,7 @@ yarn-error.log*
 package.json
 package-lock.json
 testServer.js
+
+# Ignore upload folders
+src/uploads/
+uploads/
