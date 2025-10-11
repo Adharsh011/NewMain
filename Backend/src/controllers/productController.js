@@ -1,32 +1,33 @@
 const Product = require("../model/Product");
-const Vendor = require("../model/Vendor");
 
-// CREATE PRODUCT
+// ✅ CREATE PRODUCT (Vendor only)
 exports.createProduct = async (req, res) => {
   try {
-    const { title, description, price, stock, category } = req.body;
-    const imageUrl = req.file ? req.file.path : req.body.imageUrl || null;
-
-    const vendor = await Vendor.findOne({ user: req.user.id });
-    if (!vendor) return res.status(403).json({ message: "Not a vendor" });
+    const { title, description, price, stock, category, images } = req.body;
 
     const product = await Product.create({
-      vendor: vendor._id,
+      vendor: req.vendor._id, // from isVendor middleware
       title,
       description,
       price,
       stock,
       category,
-      imageUrl,
+      images,
     });
 
-    res.status(201).json(product);
+    res.status(201).json({
+      message: "✅ Product created successfully",
+      product,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Product creation failed", error: error.message });
+    console.error("Create Product Error:", error);
+    res
+      .status(500)
+      .json({ message: "Product creation failed", error: error.message });
   }
 };
 
-// GET ALL PRODUCTS
+// ✅ GET ALL PRODUCTS (Public)
 exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find().populate("vendor", "shopName");
@@ -36,47 +37,67 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// GET PRODUCT BY ID
+// ✅ GET PRODUCT BY ID (Public)
 exports.getProductById = async (req, res) => {
   try {
-    const productID = await Product.findById(req.params.id).populate("vendor", "shopName");
-    if (!productID) return res.status(404).json({ message: "Product not found" });
-    res.json(productID);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// UPDATE PRODUCT
-exports.updateProduct = async (req, res) => {
-  try {
-    const vendor = await Vendor.findOne({ user: req.user.id });
-    const product = await Product.findById(req.params.id);
-
-    if (!product) return res.status(404).json({ message: "Product Not Found" });
-    if (product.vendor.toString() !== vendor._id.toString())
-      return res.status(403).json({ message: "Unauthorized" });
-
-    Object.assign(product, req.body);
-    await product.save();
+    const product = await Product.findById(req.params.id).populate(
+      "vendor",
+      "shopName"
+    );
+    if (!product)
+      return res.status(404).json({ message: "Product not found" });
     res.json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// DELETE PRODUCT
+// ✅ UPDATE PRODUCT (Vendor only)
+exports.updateProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product)
+      return res.status(404).json({ message: "Product not found" });
+
+    // Ensure the vendor owns this product
+    if (product.vendor.toString() !== req.vendor._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You are not the product owner." });
+    }
+
+    // Update product fields
+    Object.assign(product, req.body);
+    await product.save();
+
+    res.status(200).json({
+      message: "✅ Product updated successfully",
+      product,
+    });
+  } catch (error) {
+    console.error("Update Product Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ DELETE PRODUCT (Vendor only)
 exports.deleteProduct = async (req, res) => {
   try {
-    const vendor = await Vendor.findOne({ user: req.user.id });
     const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product Not Found" });
-    if (product.vendor.toString() !== vendor._id.toString())
-      return res.status(403).json({ message: "Unauthorized" });
+    if (!product)
+      return res.status(404).json({ message: "Product not found" });
+
+    // Ensure the vendor owns this product
+    if (product.vendor.toString() !== req.vendor._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You are not the product owner." });
+    }
 
     await product.deleteOne();
-    res.json({ message: "Product deleted successfully" });
+    res.status(200).json({ message: "🗑️ Product deleted successfully" });
   } catch (error) {
+    console.error("Delete Product Error:", error);
     res.status(500).json({ message: error.message });
   }
 };

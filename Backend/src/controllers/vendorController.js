@@ -1,8 +1,19 @@
-const Vendor = require('../model/Vendor')
+const Vendor = require("../model/Vendor")
 
 exports.createVendor = async(req,res)=>{
     try{
         const {shopName,description} = req.body;
+
+        const existing = await Vendor.findOne(
+            {
+                user:req.user.id
+            }
+        )
+        if(existing){
+            return res.status(400).json({
+                message:"Vendor profile already exists for this user"
+            })
+        }
 
         const vendor = await Vendor.create({
             user:req.user.id,
