@@ -1,6 +1,6 @@
 import React,{useState} from "react";
-import api from "../utils/axiosInstance";
-import MultiImageUpload from "./MultiUpload.js";
+import MultiImageUpload from "../../components/MultiUpload.js";
+import api from "../../api/axiosInstance.js";
 
 const AddProduct = ()=>{
     const [productData,setProductData]  = useState({
