@@ -27,7 +27,7 @@ const Login = () => {
 
   return (
     <div style={{ maxWidth: 400, margin: "100px auto", textAlign: "center" }}>
-      <h2>Vendor Login 🔐</h2>
+      <h2>User Login 🔐</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="email"
