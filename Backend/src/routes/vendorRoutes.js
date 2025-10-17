@@ -1,10 +1,17 @@
-const express  = require('express');
-const {createVendor,getMyVendor} = require("../controllers/vendorController");
-const router = express.Router();
-const protect = require("../middleware/authMiddleware");
+    const express  = require('express');
+    const {registerVendor,loginVendor} = require("../controllers/vendorController");
+    const vendorProtect = require("../middleware/isVendor") 
+    const router = express.Router();
 
-router.post("/create",protect,createVendor);
-router.get("/me",protect,getMyVendor);
 
-module.exports = router;
+    router.post("/register",registerVendor);
+    router.post("/login",loginVendor);
+    router.get("/profile", vendorProtect, (req, res) => {
+  res.json({
+    message: "Vendor Profile",
+    vendor: req.vendor,
+  });
+});
+
+    module.exports = router;
 

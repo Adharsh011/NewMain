@@ -1,14 +1,10 @@
 const Vendor = require("../model/Vendor")
 
-exports.createVendor = async(req,res)=>{
+exports.registerVendor = async(req,res)=>{
     try{
-        const {shopName,description} = req.body;
+        const {name,email,password,shopName,description} = req.body;
 
-        const existing = await Vendor.findOne(
-            {
-                user:req.user.id
-            }
-        )
+        const existing = await Vendor.findOne({email});
         if(existing){
             return res.status(400).json({
                 message:"Vendor profile already exists for this user"
@@ -16,7 +12,9 @@ exports.createVendor = async(req,res)=>{
         }
 
         const vendor = await Vendor.create({
-            user:req.user.id,
+            email,
+            name,
+            password,
             shopName,
             description
         });
@@ -28,11 +26,30 @@ exports.createVendor = async(req,res)=>{
     }
 };
 
-exports.getMyVendor = async (req,res)=>{
+exports.loginVendor = async (req,res)=>{
+    console.log("good")
     try{
-        const vendor = await Vendor.findOne({user:req.user.id});
+        const {email,password} = req.body;
+        console.log(email,password);
+        const vendor = await Vendor.findOne({email});
         if(!vendor) return res.status(404).json({message:"Vendor is Not Found"});
-        res.json(vendor);
+        const isMatch = await vendor.matchPassword(password);
+         if(!isMatch) return res.status(404).json({message:"Vendor is Not Found"});
+        
+         const token = vendor.getSignedToken();
+
+         res.json (
+        {
+            message:"Login Successfully",
+            token,
+            vendor
+        }
+         )
+         console.log({
+  message: "Login response sent",
+  token,
+  vendor
+})
 
     }catch(error){
         res.status(500).json({message:error.message})

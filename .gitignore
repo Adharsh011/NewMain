@@ -23,3 +23,6 @@ testServer.js
 # Ignore upload folders
 src/uploads/
 uploads/
+frontend/src/utils/axiosInstance.js
+frontend/src/components/AddProduct.js
+frontend/src/components/AddProduct.js
