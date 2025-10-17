@@ -15,38 +15,43 @@ import Orders from "./pages/Vendor/Order";
 import ProductList from "./pages/Vendor/ProductList";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-
-
-
+import VendorLogin from "./pages/Vendor/VendorLogin";
+import VendorRegister from "./pages/Vendor/VendorRegister"
+import { VendorAuthProvider } from "./context/VendorAuthContext";
 
 
 function App() {
   return (
    <BrowserRouter>
+   <VendorAuthProvider>
    <Header/>
       <div className="p-6">
-      <h1 className="text-center text-3xl font-bold text-blue-800 mb-10">
-        🛒 Buddies Buy – Route Testing
-      </h1>
+      
       <Routes>
       <Route path="/" element={<Homepage/>}></Route>
        <Route path="/pdp" element={<PDP/>}></Route>
         <Route path="/plp" element={<PLP/>}></Route>
         <Route path="/cart" element={<Cart/>}></Route>
-       <Route path="/register" element={<Register/>}></Route>
+       
         <Route path="/order-confirmatiom" element={<OrderConfirmation/>}></Route>
-        <Route path="/login" element={<Login/>}></Route>
+       <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} ></Route>
         {/*Vendor*/}
        <Route path="/vendor/dashboard" element={<Dashboard/>}></Route>
         <Route path="?vendor/products" element={<ProductList/>}></Route>
+        
+{/* Vendor Auth */}
+<Route path="/vendor/login" element={<VendorLogin />} />
+<Route path="/vendor/register" element={<VendorRegister />} />
         <Route></Route>
        <Route></Route>
         <Route></Route>
          <Route></Route>
      </Routes>
-       <Homepage></Homepage>
+  
       </div>
       <Footer/>
+      </VendorAuthProvider>
     </BrowserRouter>
   );
 }
