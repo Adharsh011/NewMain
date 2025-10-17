@@ -2,9 +2,11 @@ import { Navigate } from "react-router-dom";
 import { useVendorAuth } from "../context/VendorAuthContext";
 
 export default function VendorProtectedRoute({children}){
-    const token = useVendorAuth();
+    const {isAuthenticated,loading} = useVendorAuth();
+    
+    if(loading) return null;
 
-    if(!token){
+    if(!isAuthenticated){
         return <Navigate to="/vendor/login" replace/>
     }
 
