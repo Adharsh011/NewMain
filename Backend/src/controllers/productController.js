@@ -28,7 +28,7 @@ exports.createProduct = async (req, res) => {
 };
 
 // ✅ GET ALL PRODUCTS (Public)
-exports.getProducts = async (req, res) => {
+exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().populate("vendor", "shopName");
     res.json(products);
@@ -51,6 +51,17 @@ exports.getProductById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getVendorProducts = async (req,res)=>{
+  try{
+    console.log("Good");
+    const products = await Product.find({vendor:req.vendor._id});
+    console.log(products);
+    res.json({products});
+  }catch(err){
+    res.status(500).json({message:err.message});
+  }
+}
 
 // ✅ UPDATE PRODUCT (Vendor only)
 exports.updateProduct = async (req, res) => {

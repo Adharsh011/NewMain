@@ -1,24 +1,25 @@
+// src/routes/productRoutes.js
 const express = require("express");
-const router = express.Router();
-const protect = require("../middleware/authMiddleware");
-const isVendor = require("../middleware/isVendor");
 const {
-  createProduct,
-  getProducts,
+  getAllProducts,
   getProductById,
+  createProduct,
   updateProduct,
   deleteProduct,
+  getVendorProducts,
 } = require("../controllers/productController");
 
-// Vendor-only product creation
-router.post("/", protect, isVendor, createProduct);
+const vendorProtect = require("../middleware/isVendor");
+const router = express.Router();
 
-// Public routes
-router.get("/", getProducts);
+// 🟢 Public routes
+router.get("/", getAllProducts);
 router.get("/:id", getProductById);
 
-// Vendor-protected routes
-router.put("/:id", protect, isVendor, updateProduct);
-router.delete("/:id", protect, isVendor, deleteProduct);
+// 🟠 Vendor-protected routes
+router.post("/", vendorProtect, createProduct);
+router.get("/vendor/my-products", vendorProtect, getVendorProducts);
+router.put("/:id", vendorProtect, updateProduct);
+router.delete("/:id", vendorProtect, deleteProduct);
 
 module.exports = router;

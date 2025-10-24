@@ -21,10 +21,7 @@ export default function Header() {
           </NavLink>
           <NavLink to="/plp" className={navItemClass}>PLP</NavLink>
           <NavLink to="/pdp" className={navItemClass}>PDP</NavLink>
-          <NavLink to="/login" className={navItemClass}>LOGIN</NavLink>
           <NavLink to="/cart" className={navItemClass}>Cart</NavLink>
-          <NavLink to="/vendor/dashboard" className={navItemClass}>DashBoard</NavLink>
-          <NavLink to="/vendor/add-product" className={navItemClass}>Add_Poduct</NavLink>
           <NavLink to="/vendor/products" className={navItemClass}>Product</NavLink>
         </nav>
       </div>
