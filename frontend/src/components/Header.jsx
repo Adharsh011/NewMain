@@ -1,30 +1,79 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useVendorAuth } from "../context/VendorAuthContext";
 
 export default function Header() {
-  const navItemClass =
-    "px-3 py-2 text-gray-700 hover:text-blue-600 hover:underline transition";
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logoutUser } = useAuth();
+  const { vendor, isAuthenticated: vendorAuth, logoutVendor } = useVendorAuth();
+
+  // ✅ Detect role properly (from backend data)
+  const role = vendorAuth
+    ? "vendor"
+    : isAuthenticated
+    ? user?.role?.toLowerCase() || "customer"
+    : null;
+
+  console.log("Detected Role:", role);
+
+  const handleLogout = () => {
+    if (role === "vendor") logoutVendor();
+    else logoutUser();
+    navigate("/");
+  };
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto flex justify-between items-center px-6 py-4">
-        <Link
-          to="/"
-          className="text-2xl font-bold text-blue-700 hover:text-blue-800"
-        >
+    <header className="bg-white shadow-md sticky top-0 z-10">
+      <div className="container mx-auto flex items-center justify-between px-6 py-3">
+        {/* Logo */}
+        <Link to="/" className="text-2xl font-bold text-blue-600">
           🛍️ Buddies Buy
         </Link>
-        <nav className="flex space-x-2">
-          <NavLink to="/" className={({isActive})=>
-          `${navItemClass} ${isActive ? "text-orange-800 font-semibold" : ""}`
-          }>
-            Home
-          </NavLink>
-          <NavLink to="/plp" className={navItemClass}>PLP</NavLink>
-          <NavLink to="/pdp" className={navItemClass}>PDP</NavLink>
-          <NavLink to="/cart" className={navItemClass}>Cart</NavLink>
-          <NavLink to="/vendor/products" className={navItemClass}>Product</NavLink>
+
+        <nav className="flex items-center gap-6 text-gray-700 font-medium">
+          <Link to="/">Home</Link>
+          <Link to="/products">Shop</Link>
+          <Link to="/cart">🛒 Cart</Link>
+
+          {/* If no one logged in */}
+          {!role && (
+            <>
+              <Link to="/login">User Login</Link>
+              <Link to="/vendor/login">Vendor Login</Link>
+            </>
+          )}
+
+          {/* ✅ User logged in (role=customer) */}
+          {role === "customer" && (
+            <>
+              <span className="text-blue-600">
+                Hello, {user?.name || "User"}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="text-red-500 hover:text-red-600"
+              >
+                Logout
+              </button>
+            </>
+          )}
+
+          {/* ✅ Vendor logged in */}
+          {role === "vendor" && (
+            <>
+              <Link to="/vendor/dashboard">Dashboard 🎛️</Link>
+              <span className="text-green-600">{vendor?.name || "Vendor"}</span>
+              <button
+                onClick={handleLogout}
+                className="text-red-500 hover:text-red-600"
+              >
+                Logout
+              </button>
+            </>
+          )}
         </nav>
       </div>
     </header>
   );
 }
+  
