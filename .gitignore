@@ -26,3 +26,4 @@ uploads/
 frontend/src/utils/axiosInstance.js
 frontend/src/components/AddProduct.js
 frontend/src/components/AddProduct.js
+frontend/public

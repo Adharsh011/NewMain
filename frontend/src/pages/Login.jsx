@@ -1,26 +1,31 @@
 import React, { useState } from "react";
 import api from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // ✅ import context
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // must be inside BrowserRouter
+  const navigate = useNavigate();
+  const { loginUser } = useAuth(); // ✅ get loginUser function
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await api.post("/auth/login", { email, password });
+      console.log("Login response:", response.data);
 
-      if (response.data && response.data.token) {
-        localStorage.setItem("token", response.data.token);
+      if (response.data && response.data.token && response.data.user) {
+        // ✅ call context function to update global state
+        loginUser(response.data.user, response.data.token);
+
         alert("✅ Login Successful");
-        navigate("/add-product"); // redirect after login
+        navigate("/"); // redirect to homepage
       } else {
-        alert("No token received — check backend response");
+        alert("⚠️ Invalid login response: missing token or user");
       }
     } catch (error) {
-      console.error(error);
+      console.error("❌ Login failed:", error);
       alert("Invalid email or password");
     }
   };
@@ -59,6 +64,15 @@ const Login = () => {
         >
           Login
         </button>
+        <p className="text-center text-sm text-gray-600 mt-4">
+          Don’t have an account?{" "}
+          <a
+            href="/register"
+            className="text-green-600 font-semibold hover:underline"
+          >
+            Register
+          </a>
+        </p>
       </form>
     </div>
   );
